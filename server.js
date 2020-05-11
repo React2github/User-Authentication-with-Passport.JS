@@ -8,17 +8,18 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
+const { Client } = require('pg');
+const pgCamelCase = require('pg-camelcase');
+pgCamelCase.inject(require('pg'));
+const { pool } = require('./dbConfig');
 
-const initializePassport = require('./passport-config')
-initializePassport(
-    passport,
-     email => users.find(user => user.email === email),
-     id => users.find(user => user.id === id)
-)
-const users = []
+    const initializePassport = require('./passport-config')
+initializePassport(passport);
+
 
 app.set('view engine', 'ejs');
+
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
@@ -48,20 +49,25 @@ app.get('/register', checkNotAuthenticated,(req, res) => {
     res.render('register.ejs')
 })
 
-app.post('/register',checkNotAuthenticated, async (req, res) => {
-    try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    users.push({
-        id: Date.now().toString(),
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
-    })
-    res.redirect('/login')
-    } catch {
-     res.redirect('/register')
-    }
-})
+app.post('/register', async (req, res) => {
+    let { name, email, password } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+       pool.query(`INSERT INTO public.accounts (name, email, password) 
+       VALUES ($1, $2, $3)
+       RETURNING id, password`, [name, email, hashedPassword],  
+       (err, results) => {
+               if (err) {
+                throw err;
+               }
+               req.flash('success_msg', "You are now registered. Please log in");
+               res.redirect('/login');
+           })
+       
+        });
+       
+    
+
 
 app.delete('/logout', (req, res) => {
     req.logOut()
