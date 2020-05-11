@@ -9,15 +9,15 @@ const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
 
-const initializePassport = require('./passport-config.js')
+const initializePassport = require('./passport-config')
 initializePassport(
     passport,
-     email => users.find(user => user.email === email)
+     email => users.find(user => user.email === email),
+     id => users.find(user => user.id === id)
 )
 const users = []
 
 app.set('view engine', 'ejs');
-app.set('views', 'views');
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
@@ -29,7 +29,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.get('/', (req,res) => {
-    res.render('index.ejs')
+    res.render('index.ejs', { name: req.user.name })
 });
 
 app.get('/login', (req, res) => {
