@@ -1,4 +1,20 @@
-<h1>Hey <%= name %></h1>
-<form action='/logout?_method=DELETE' method='POST'>
-<button type='submit'>Log Out</button>
-</form>
+<!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                background-color:cornsilk;
+            }
+            .main {
+                display: flex;
+                justify-content: center;
+            }
+        </style>
+    </head>
+        <body>
+            <h1 class='main'>Hey <%= name %></h1>
+            <form action='/logout?_method=DELETE' method='POST' class='main'>
+                <button type='submit'>Log Out</button>
+                </form>
+        </body>
+</html>
